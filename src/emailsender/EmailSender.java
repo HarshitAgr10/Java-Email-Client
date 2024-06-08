@@ -17,6 +17,7 @@ public class EmailSender {
         prop.put("mail.smtp.auth", "true");
         prop.put("mail.smtp.starttls.enable", "true");
 
+        // Create a Session object
         Session session = Session.getInstance(prop, new javax.mail.Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password);
@@ -24,6 +25,7 @@ public class EmailSender {
         });
 
         try {
+            // Create a MimeMessage object
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(username));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
@@ -31,6 +33,7 @@ public class EmailSender {
             message.setSubject(subject);
             message.setText(body);
 
+            // Send the email
             Transport.send(message);
             System.out.println("Email sent successfully via Gmail");
 
