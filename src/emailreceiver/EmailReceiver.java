@@ -2,10 +2,22 @@ package emailreceiver;
 
 import javax.mail.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class EmailReceiver {
-    public static void receiveEmail(String username, String password) {
+
+    // Static fields for storing email credentials
+    private static String username = "";
+    private static String password = "";
+
+    // Method to get credentials
+    public static void setCredentials(String user, String pass) {
+        username = user;
+        password = pass;
+    }
+    public static Message[] receiveEmail() throws MessagingException, IOException {
         // Set properties
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
@@ -13,9 +25,10 @@ public class EmailReceiver {
         properties.put("mail.imaps.port", "993");
         properties.put("mail.imaps.ssl.enable", "true");
 
-        try {
+            List<Message> messageList = new ArrayList<Message>();
+
             // Get the Session object
-            Session emailSession = Session.getDefaultInstance(properties);
+            Session emailSession = Session.getInstance(properties);
 
             // Create the IMAP store object and connect to the mail server
             Store store = emailSession.getStore("imaps");
@@ -27,22 +40,14 @@ public class EmailReceiver {
 
             // Fetch messages from the server
             Message[] messages = emailFolder.getMessages();
-            System.out.println("Number of emails: " + messages.length);
-
-            // e.g. :- Print out subject of each email
             for (Message message : messages) {
-                System.out.println("Email Subject: " + message.getSubject());
-                System.out.println("From: " + message.getFrom()[0]);
-                System.out.println("Text: " + message.getContent().toString());
+                messageList.add(message);
             }
 
             // Close the store and folder objects
             emailFolder.close(false);
             store.close();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (MessagingException | IOException e) {
-            e.printStackTrace();
-        }
+
+            return messageList.toArray(new Message[0]);
     }
 }
