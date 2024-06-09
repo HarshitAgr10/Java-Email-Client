@@ -21,7 +21,7 @@ public class EmailReceiver {
             Store store = emailSession.getStore("imaps");
             store.connect("imap.gmail.com", username, password);
 
-            // Open the inbox folder
+            // Open the inbox folder from store in READ-ONLY mode
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);
 
