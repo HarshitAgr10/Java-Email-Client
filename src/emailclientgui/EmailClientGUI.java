@@ -1,9 +1,15 @@
 package emailclientgui;
 
+import emailsessionmanager.EmailSessionManager;
+import javax.mail.MessagingException;
 import javax.swing.*;
 import java.awt.*;
 
 public class EmailClientGUI extends JFrame {
+
+    // Text fields for user to input username and password
+    private JTextField usernameField = new JTextField(20);
+    private JPasswordField passwordField = new JPasswordField(20);
 
     // Constructor for EmailClientGUI class
     public EmailClientGUI() {
@@ -27,7 +33,45 @@ public class EmailClientGUI extends JFrame {
         emailContent.setEditable(false);            // Make the text area non-editable(read-only)
         add(new JScrollPane(emailContent), BorderLayout.CENTER); // Add text area to scroll pane and to center of layout
 
+        // Compose Button
         JButton composeButton = new JButton("Compose");  // Button for composing new emails
-        add(composeButton, BorderLayout.SOUTH);   // Add compose button to south side of layout
+        add(composeButton, BorderLayout.SOUTH);     // Add compose button to south side of layout
+
+        // Schedule showLoginDialog() to be run on Event Dispatch thread,
+        // ensuring that login dialog is shown after UI components are initialized
+        SwingUtilities.invokeLater((this::showLoginDialog));
+    }
+
+    // Method to show login dialog
+    private void showLoginDialog() {
+        // Create a panel with a grid layout for the login dialog
+        JPanel loginPanel = new JPanel(new GridLayout(0, 1));
+        loginPanel.add(new JLabel("Email:"));
+        loginPanel.add(usernameField);
+        loginPanel.add(new JLabel("Password:"));
+        loginPanel.add(passwordField);
+
+        // Show a confirmation dialog with login panel, OK and Cancel options
+        int result = JOptionPane.showConfirmDialog(null, loginPanel,
+                "Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (result == JOptionPane.OK_OPTION) {
+            // If OK is selected, retrieve the entered username and password
+            String username = usernameField.getText();
+            String password = new String(passwordField.getPassword());
+
+            try {
+                // Initialize EmailSessionManager with provided username and password
+                EmailSessionManager.getInstance(username, password);
+            } catch (MessagingException e)
+            {
+                // Show an error message if email session initialization fails
+                JOptionPane.showMessageDialog(this,
+                        "Failed to initialize email session:" + e.getMessage(),
+                        "Login Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            // Print to console if login is cancelled
+            System.out.println("Login cancelled");
+        }
     }
 }
