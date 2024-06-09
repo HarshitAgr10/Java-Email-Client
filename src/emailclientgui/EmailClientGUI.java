@@ -20,7 +20,7 @@ public class EmailClientGUI extends JFrame {
         // Inbox Panel
         DefaultListModel<String> emailListModel = new DefaultListModel<>();   // To hold list of email subjects
         JList<String> emailList = new JList<>(emailListModel);    // To display list of emails using email list model
-        add(new JScrollPane(emailList), BorderLayout.WEST);     // Add email list to scroll pane and to west of layout
+        add(new JScrollPane(emailList), BorderLayout.WEST);      // Add email list to scroll pane and to west of layout
 
         // Reading Panel
         JTextArea emailContent = new JTextArea();   // A test area for displaying content of selected email
