@@ -9,8 +9,8 @@ public class EmailReceiver {
         // Set properties
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
-        properties.put("mail.imaps.host", "smtp.gmail.com");
-        properties.put("mail.smtp.port", "993");
+        properties.put("mail.imaps.host", "imaps.gmail.com");
+        properties.put("mail.imaps.port", "993");
         properties.put("mail.imaps.ssl.enable", "true");
 
         try {
