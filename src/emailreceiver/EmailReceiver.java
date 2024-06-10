@@ -17,7 +17,9 @@ public class EmailReceiver {
         username = user;
         password = pass;
     }
-    public static Message[] receiveEmail() throws MessagingException, IOException {
+
+    // Method to receive limited number of emails from a Gmail account
+    public static Message[] receiveEmail(int limit) throws MessagingException, IOException {
         // Set properties
         Properties properties = new Properties();
         properties.put("mail.store.protocol", "imaps");
@@ -25,29 +27,32 @@ public class EmailReceiver {
         properties.put("mail.imaps.port", "993");
         properties.put("mail.imaps.ssl.enable", "true");
 
-            List<Message> messageList = new ArrayList<Message>();
+        List<Message> messageList = new ArrayList<Message>();
 
-            // Get the Session object
-            Session emailSession = Session.getInstance(properties);
+        // Get the Session object
+        Session emailSession = Session.getInstance(properties);
 
-            // Create the IMAP store object and connect to the mail server
-            Store store = emailSession.getStore("imaps");
-            store.connect("imap.gmail.com", username, password);
+        // Create the IMAP store object and connect to the mail server
+        Store store = emailSession.getStore("imaps");
+        store.connect("imap.gmail.com", username, password);
 
-            // Open the inbox folder from store in READ-ONLY mode
-            Folder emailFolder = store.getFolder("INBOX");
-            emailFolder.open(Folder.READ_ONLY);
+        // Open the inbox folder from store in READ-ONLY mode
+        Folder emailFolder = store.getFolder("INBOX");
+        emailFolder.open(Folder.READ_ONLY);
 
-            // Fetch messages from the server
-            Message[] messages = emailFolder.getMessages();
-            for (Message message : messages) {
-                messageList.add(message);
-            }
+        // Fetch messages from the server
+        Message[] messages = emailFolder.getMessages();
+        for (int i = 0; i < Math.min(limit, messages.length); i++) {
+            messageList.add(messages[i]);
+        }
+//        for (Message message : messages) {
+//            messageList.add(message);
+//        }
 
-            // Close the store and folder objects
-            emailFolder.close(false);
-            store.close();
+        // Close the store and folder objects
+        emailFolder.close(false);
+        store.close();
 
-            return messageList.toArray(new Message[0]);
+        return messageList.toArray(new Message[0]);
     }
 }

@@ -1,6 +1,7 @@
 package emailsessionmanager;
 
 import javax.mail.*;
+import java.util.Arrays;
 import java.util.Properties;
 
 // Singleton EmailSessionManager class to manage email sessions for connecting to, fetching
@@ -61,14 +62,15 @@ public class EmailSessionManager {
         return currentPassword;
     }
 
-    // Method for fetching emails from the inbox
-    public Message[] receiveEmail() throws MessagingException {
+    // Method for fetching emails from the inbox (Passing limit variable to fetch limited number of emails)
+    public Message[] receiveEmail(int limit) throws MessagingException {
         // Open the inbox folder if it's not already open
         if (emailFolder == null || !emailFolder.isOpen()) {
             emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_ONLY);   // Open in read-only mode
         }
-        return emailFolder.getMessages();   // Return the messages from inbox
+        Message[] messages = emailFolder.getMessages();
+        return Arrays.copyOfRange(messages, 0, Math.min(limit, messages.length));   // Return the messages from inbox
     }
 
     // Method to properly close the emailFolder and store

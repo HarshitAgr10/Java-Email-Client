@@ -33,7 +33,7 @@ public class EmailSenderWithAttachment {
 
             try {
                 // Create a MimeMessage object
-                MimeMessage message = new MimeMessage(session);
+                Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress(username));    // Sender's email
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));   // Recipient's email
                 message.setSubject(subject);      // Email subject
