@@ -2,13 +2,17 @@ package emailclientgui;
 
 import emailsessionmanager.EmailSessionManager;
 
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMultipart;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 
 
 public class EmailClientGUI extends JFrame {
@@ -53,6 +57,11 @@ public class EmailClientGUI extends JFrame {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setResizeWeight(0.5);
         splitPane.setOneTouchExpandable(true);   // To expand or collapse split pane with one touch
+
+        // Set selection mode of email list to single selection, allowing only one email to be selected at a time
+        emailList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // Add listSelectionListener to email list that triggers emailListSelectionChanged() whenever email is selected
+        emailList.addListSelectionListener(this::emailListSelectionChanged);
 
         // To wrap email list in a scroll pane, allowing list to be scrollable
         JScrollPane listScrollPane = new JScrollPane(emailList);
@@ -135,5 +144,42 @@ public class EmailClientGUI extends JFrame {
             // Print to console if login is cancelled
             System.out.println("Login cancelled");
         }
+    }
+
+    // Method to handle changes in the email list selection
+    private void emailListSelectionChanged(ListSelectionEvent e) {
+        // Check if value is adjusting(i.e. if selection is being updated) and if an email is selected
+        if (!e.getValueIsAdjusting() && emailList.getSelectedIndex() != -1) {
+            try {
+                // Get selected email message from messages[] based on selected index
+                Message selectedMessage = messages[emailList.getSelectedIndex()];
+                emailContent.setText("");     // Clear previous content in email content text area
+                emailContent.append("Subject: " + selectedMessage.getSubject() + "\n\n");
+                emailContent.append("From: " + InternetAddress
+                        .toString(selectedMessage.getFrom()) + "\n\n");
+                emailContent.append(getTextFromMessage(selectedMessage));
+            } catch (MessagingException | IOException ex) {
+                // If there is error reading email content, display an error message in email content text area
+                emailContent.setText("Error reading email content: " + ex.getMessage());
+            }
+        }
+    }
+
+    // Method to extract the text content from a given email message
+    private String getTextFromMessage(Message message) throws MessagingException, IOException {
+        // Check if message content type is plain text
+        if (message.isMimeType("text/plain")) {
+            return (String) message.getContent();   // Return plain text content of message
+        } else if (message.isMimeType("multipart/*")) {
+            // If message content type is multipart, cast it to MimeMultipart
+            MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
+            for (int i = 0; i < mimeMultipart.getCount(); i++) {
+                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+                if (bodyPart.isMimeType("text/plain")) {
+                    return (String) bodyPart.getContent();
+                }
+            }
+        }
+        return "No readable content found";
     }
 }
