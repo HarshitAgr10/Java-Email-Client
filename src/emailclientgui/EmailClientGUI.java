@@ -4,6 +4,9 @@ import emailsessionmanager.EmailSessionManager;
 import javax.mail.MessagingException;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
 
 public class EmailClientGUI extends JFrame {
 
@@ -18,6 +21,22 @@ public class EmailClientGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // Set default close operation(Exit app when window is closed)
         initUI();
         setVisible(true);                   // Make the window visible
+
+        // Add window listener to handle application close (Logout Functionality)
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    // Check if EmailSessionManager instance is initialized
+                    if (EmailSessionManager.getInstance() != null) {
+                        // CLose the email session
+                        EmailSessionManager.getInstance().close();
+                    }
+                } catch (MessagingException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
 
     // Method to initialize user interface components
@@ -42,7 +61,7 @@ public class EmailClientGUI extends JFrame {
         SwingUtilities.invokeLater((this::showLoginDialog));
     }
 
-    // Method to show login dialog
+    // Method to show login dialog (Login Functionality)
     private void showLoginDialog() {
         // Create a panel with a grid layout for the login dialog
         JPanel loginPanel = new JPanel(new GridLayout(0, 1));
