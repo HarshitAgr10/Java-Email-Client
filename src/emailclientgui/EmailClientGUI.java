@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.awt.FlowLayout;
 
 
 public class EmailClientGUI extends JFrame {
@@ -94,7 +95,7 @@ public class EmailClientGUI extends JFrame {
         // Compose Button
         JButton composeButton = new JButton("Compose");  // Button for composing new emails
         // add(composeButton, BorderLayout.SOUTH);     // Add compose button to south side of layout
-        composeButton.addActionListener(e -> showComposeDialog());
+        composeButton.addActionListener(e -> showComposeDialog("", "", ""));
 
         JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
         JButton refreshInboxButton = new JButton("Refresh Box");
@@ -102,6 +103,19 @@ public class EmailClientGUI extends JFrame {
         bottomPanel.add(composeButton);
         bottomPanel.add(refreshInboxButton);
         add(bottomPanel, BorderLayout.SOUTH);
+
+        // Create "Reply" and "Forward" buttons
+        JButton replyButton = new JButton("Reply");
+        JButton forwardButton = new JButton("Forward");
+        // Add action listeners to the buttons to handle the click events
+        replyButton.addActionListener(e -> prepareEmailAction("Reply"));
+        forwardButton.addActionListener(e -> prepareEmailAction("Forward"));
+
+        // Create a panel to hold the buttons with a right-aligned flow layout
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        actionPanel.add(replyButton);
+        actionPanel.add(forwardButton);
+        add(actionPanel, BorderLayout.NORTH);    // Add the action panel to the north side of the main frame
 
         // Add action listener to refresh button to call refreshBox() when button is clicked
         refreshInboxButton.addActionListener(e -> refreshBox());
@@ -208,17 +222,49 @@ public class EmailClientGUI extends JFrame {
         return "No readable content found";
     }
 
+    // Method to prepare emails based on the type of action the user has opted for
+    private void prepareEmailAction(String actionType) {
+        // Check if an email is selected from the list
+        if (emailList.getSelectedIndex() == -1) {
+            // Show error message if no email is selected
+            JOptionPane.showMessageDialog(this, "No email selected",
+             "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        try {
+            // Get the selected email message
+            Message selectedMessage = messages[emailList.getSelectedIndex()];
+
+            // Determine the recipient and subject based on the action type
+            String to = actionType.equals("Reply") ? InternetAddress
+                    .toString(selectedMessage.getFrom()) : "";
+            String subjectPrefix = actionType.equals("Reply") ? "Re: " : "Fwd: ";
+            String subject = subjectPrefix + selectedMessage.getSubject();
+
+            // Get the body of the selected email
+            String body = getTextFromMessage(selectedMessage);
+
+            // Call the composeDialog() with pre-filled fields
+            showComposeDialog(to, subject, body);
+        } catch (MessagingException | IOException ex) {
+            // Show error message if there's an issue preparing the email action
+            JOptionPane.showMessageDialog(this, "Error preparing email action.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     // Method to show the compose email dialog
-    private void showComposeDialog() {
+    private void showComposeDialog(String to, String subject, String body) {
         JDialog composeDialog = new JDialog(this, "Compose Email", true);
         composeDialog.setLayout(new BorderLayout(5, 5));
 
         // Create a vertical box to hold the fields for the email
         Box fieldsPanel = Box.createVerticalBox();
-        JTextField toField = new JTextField();      // Text field for recipient's email address
-        JTextField subjectField = new JTextField();  // Text field for the email subject
+        JTextField toField = new JTextField(to);      // Text field for recipient's email address
+        JTextField subjectField = new JTextField(subject);  // Text field for the email subject
 
         JTextArea bodyArea = new JTextArea(10, 20);   // Text area for email body
+        bodyArea.setText(body);
         bodyArea.setLineWrap(true);
         bodyArea.setWrapStyleWord(true);    // Wrap at word boundaries
 
@@ -243,13 +289,17 @@ public class EmailClientGUI extends JFrame {
             attachedFilesLabel.setText(attachedFiles.size() + " files attached");
         });
 
-        // Add action listener to send button to send the email and close the dialog
+        // Add an action listener to send button to send the email and close the dialog
         sendButton.addActionListener(e -> {
-            String to = toField.getText();
-            String subject = subjectField.getText();
-            String body = bodyArea.getText();
-            File[] attachments = attachedFiles.toArray(new File[0]);
-            EmailSenderWithAttachment.sendEmailWithAttachment(to, subject, body, attachments);
+//            String to = toField.getText();
+//            String subject = subjectField.getText();
+//            String body = bodyArea.getText();
+//            File[] attachments = attachedFiles.toArray(new File[0]);
+//            EmailSenderWithAttachment.sendEmailWithAttachment(to, subject, body, attachments);
+
+            // Send the email with attachments using the provided fields
+            EmailSenderWithAttachment.sendEmailWithAttachment(toField.getText(),
+                    subjectField.getText(), bodyArea.getText(), attachedFiles.toArray(new File[0]));
             composeDialog.dispose();
         });
 
