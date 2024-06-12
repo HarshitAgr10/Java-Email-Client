@@ -20,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.awt.FlowLayout;
+import java.awt.Color;
+import java.awt.Font;
 
 
 public class EmailClientGUI extends JFrame {
@@ -58,6 +60,17 @@ public class EmailClientGUI extends JFrame {
         });
     }
 
+    // Define constant variables for the color of background main window, action panel window
+    // and buttons in the GUI.   RGB values(230, 240, 250) :- light blueish shade
+    private static final Color BACKGROUND_COLOR = new Color(230, 240, 250);
+    private static final Color ACTION_PANEL_COLOR = new Color(200, 220, 240);
+    private static final Color BUTTON_COLOR = new Color(180, 220, 240);
+
+    // Define constant variables for the font used for buttons, in email list, in email content display area
+    private static final Font BUTTON_FONT = new Font("SansSerif", Font.BOLD, 12);
+    private static final Font EMAIL_LIST_FONT = new Font("SansSerif", Font.PLAIN, 14);
+    private static final Font EMAIL_CONTENT_FONT = new Font("SansSerif", Font.PLAIN, 14);
+
     // Method to initialize user interface components
     private void initUI() {
 
@@ -70,15 +83,19 @@ public class EmailClientGUI extends JFrame {
         emailList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         // Add listSelectionListener to email list that triggers emailListSelectionChanged() whenever email is selected
         emailList.addListSelectionListener(this::emailListSelectionChanged);
+        emailList.setFont(EMAIL_LIST_FONT);
 
         // To wrap email list in a scroll pane, allowing list to be scrollable
         JScrollPane listScrollPane = new JScrollPane(emailList);
         emailContent.setEditable(false);     // Make email content text area read only
+        emailContent.setFont(EMAIL_CONTENT_FONT);
 
         // To wrap email content text area in a scroll pane, making content area scrollable
         JScrollPane contentScrollPane = new JScrollPane(emailContent);
+        contentScrollPane.setBackground(BACKGROUND_COLOR);
         splitPane.setLeftComponent(listScrollPane);
         splitPane.setRightComponent(contentScrollPane);
+        getContentPane().setBackground(BACKGROUND_COLOR);
         // Add split pane to the center of JFrame's content pane, filling the available space
         getContentPane().add(splitPane, BorderLayout.CENTER);
 
@@ -95,10 +112,19 @@ public class EmailClientGUI extends JFrame {
         // Compose Button
         JButton composeButton = new JButton("Compose");  // Button for composing new emails
         // add(composeButton, BorderLayout.SOUTH);     // Add compose button to south side of layout
+        composeButton.setBackground(BUTTON_COLOR);
+        composeButton.setFont(BUTTON_FONT);
         composeButton.addActionListener(e -> showComposeDialog("", "", ""));
 
         JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+        bottomPanel.setBackground(ACTION_PANEL_COLOR);
+
         JButton refreshInboxButton = new JButton("Refresh Box");
+        refreshInboxButton.setBackground(BUTTON_COLOR);
+        refreshInboxButton.setFont(BUTTON_FONT);
+        // Add action listener to refresh button to call refreshBox() when button is clicked
+        refreshInboxButton.addActionListener(e -> refreshBox());
+
         // Add compose button and refresh inbox button to bottom panel
         bottomPanel.add(composeButton);
         bottomPanel.add(refreshInboxButton);
@@ -107,18 +133,20 @@ public class EmailClientGUI extends JFrame {
         // Create "Reply" and "Forward" buttons
         JButton replyButton = new JButton("Reply");
         JButton forwardButton = new JButton("Forward");
+        replyButton.setFont(BUTTON_FONT);
+        forwardButton.setFont(BUTTON_FONT);
+        replyButton.setBackground(BUTTON_COLOR);
+        forwardButton.setBackground(BUTTON_COLOR);
         // Add action listeners to the buttons to handle the click events
         replyButton.addActionListener(e -> prepareEmailAction("Reply"));
         forwardButton.addActionListener(e -> prepareEmailAction("Forward"));
 
         // Create a panel to hold the buttons with a right-aligned flow layout
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        actionPanel.setBackground(ACTION_PANEL_COLOR);
         actionPanel.add(replyButton);
         actionPanel.add(forwardButton);
         add(actionPanel, BorderLayout.NORTH);    // Add the action panel to the north side of the main frame
-
-        // Add action listener to refresh button to call refreshBox() when button is clicked
-        refreshInboxButton.addActionListener(e -> refreshBox());
 
         // Schedule showLoginDialog() to be invoked on Event Dispatch thread,
         // ensuring that login dialog is shown after UI components are initialized
@@ -129,9 +157,21 @@ public class EmailClientGUI extends JFrame {
     private void showLoginDialog() {
         // Create a panel with a grid layout for the login dialog
         JPanel loginPanel = new JPanel(new GridLayout(0, 1));
-        loginPanel.add(new JLabel("Email:"));
+        loginPanel.setBackground((BACKGROUND_COLOR));
+//        loginPanel.add(new JLabel("Email:"));
+//        loginPanel.add(usernameField);
+//        loginPanel.add(new JLabel("Password:"));
+//        loginPanel.add(passwordField);
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setFont(BUTTON_FONT);
+        loginPanel.add(emailLabel);
+        usernameField.setFont(EMAIL_LIST_FONT);
         loginPanel.add(usernameField);
-        loginPanel.add(new JLabel("Password:"));
+
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setFont(BUTTON_FONT);
+        loginPanel.add(passwordLabel);
+        passwordField.setFont(EMAIL_LIST_FONT);
         loginPanel.add(passwordField);
 
         // Show a confirmation dialog with login panel, OK and Cancel options
@@ -257,28 +297,49 @@ public class EmailClientGUI extends JFrame {
     private void showComposeDialog(String to, String subject, String body) {
         JDialog composeDialog = new JDialog(this, "Compose Email", true);
         composeDialog.setLayout(new BorderLayout(5, 5));
+        composeDialog.getContentPane().setBackground(BACKGROUND_COLOR);
 
         // Create a vertical box to hold the fields for the email
         Box fieldsPanel = Box.createVerticalBox();
+        fieldsPanel.setBackground(BACKGROUND_COLOR);
         JTextField toField = new JTextField(to);      // Text field for recipient's email address
+        toField.setFont(EMAIL_CONTENT_FONT);
         JTextField subjectField = new JTextField(subject);  // Text field for the email subject
+        subjectField.setFont(EMAIL_CONTENT_FONT);
 
         JTextArea bodyArea = new JTextArea(10, 20);   // Text area for email body
         bodyArea.setText(body);
+        bodyArea.setFont(EMAIL_CONTENT_FONT);
         bodyArea.setLineWrap(true);
         bodyArea.setWrapStyleWord(true);    // Wrap at word boundaries
 
         // Add labels and text fields to fields panel
-        fieldsPanel.add(new JLabel("To: "));
+//        fieldsPanel.add(new JLabel("To: "));
+//        fieldsPanel.add(toField);
+//        fieldsPanel.add(new JLabel("Subject: "));
+//        fieldsPanel.add(subjectField);
+        JLabel toLabel = new JLabel("To: ");
+        toLabel.setFont(BUTTON_FONT);
+        fieldsPanel.add(toLabel);
         fieldsPanel.add(toField);
-        fieldsPanel.add(new JLabel("Subject: "));
+        JLabel subjectLabel = new JLabel("Subject: ");
+        subjectLabel.setFont(BUTTON_FONT);
+        fieldsPanel.add(subjectLabel);
         fieldsPanel.add(subjectField);
 
         // Create a panel for buttons at the bottom of dialog
         JPanel bottomPanel = new JPanel();
+        bottomPanel.setBackground(ACTION_PANEL_COLOR);
         JButton attachButton = new JButton("Attach Files");
+        attachButton.setFont(BUTTON_FONT);
+        attachButton.setBackground(BUTTON_COLOR);
+
         JButton sendButton = new JButton("Send");
+        sendButton.setFont(BUTTON_FONT);
+        sendButton.setBackground(BUTTON_COLOR);
+
         JLabel attachedFilesLabel = new JLabel("No files attached");
+        attachedFilesLabel.setFont(BUTTON_FONT);
 
         // List to hold the attached files
         List<File> attachedFiles = new ArrayList<>();
